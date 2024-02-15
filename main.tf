@@ -8,7 +8,7 @@ terraform {
 }
 
 provider "github" {
-  token = ${{ secrets.SUPER_TOKEN }}
+  token = var.github_token
 }
 
 resource "github_repository" "example" {
