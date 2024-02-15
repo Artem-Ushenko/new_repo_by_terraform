@@ -1,0 +1,54 @@
+name: 'New Repo by Terraform CI/CD'
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch: # Добавляем возможность вручную запускать workflow
+
+jobs:
+  terraform_plan:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 'Checkout'
+      uses: actions/checkout@v3
+
+    - name: 'Setup Terraform'
+      uses: hashicorp/setup-terraform@v1
+      with:
+        terraform_version: 1.1.0
+
+    - name: 'Terraform Init'
+      run: terraform init
+
+    - name: 'Terraform Format'
+      run: terraform fmt -check
+
+    - name: 'Terraform Plan'
+      run: terraform plan
+
+  terraform_apply:
+    needs: [terraform_plan]
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    environment:
+      name: 'dev' # Используйте название вашего окружения, требующего одобрения
+
+    steps:
+    - name: 'Checkout'
+      uses: actions/checkout@v3
+
+    - name: 'Setup Terraform'
+      uses: hashicorp/setup-terraform@v1
+      with:
+        terraform_version: 1.1.0
+
+    - name: 'Terraform Init'
+      run: terraform init
+
+    - name: 'Terraform Apply'
+      run: terraform apply -auto-approve
