@@ -4,9 +4,6 @@ on:
   push:
     branches:
       - main
-  pull_request:
-    branches:
-      - main
   workflow_dispatch: # Adds the ability to manually trigger the workflow
 
 jobs:
@@ -36,10 +33,10 @@ jobs:
 
   terraform_apply:
     needs: [terraform_plan]
-    if: github.event_name == 'workflow_dispatch'
+    #if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
-    # environment:
-    #   name: 'dev' # Use the name of your environment that requires approval
+    environment:
+       name: 'dev' # Use the name of your environment that requires approval
 
     steps:
       - name: 'Checkout'
