@@ -4,12 +4,14 @@ on:
   push:
     branches:
       - main
-  workflow_dispatch: # Adds the ability to manually trigger the workflow
+  workflow_dispatch:
 
 jobs:
   terraform_plan:
     if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
+    outputs:
+      plan_success: ${{ steps.plan_check.outputs.plan_success }}
     
     steps:
       - name: 'Checkout'
@@ -27,20 +29,43 @@ jobs:
         run: terraform fmt
 
       - name: 'Terraform Plan'
-        run: terraform plan
+        run: terraform plan -out=tfplan
         env:
           TF_VAR_github_token: ${{ secrets.TF_GITHUB_TOKEN }}
 
+      - name: 'Check Plan Output'
+        id: plan_check
+        run: |
+          if [ -f tfplan ]; then
+            echo "::set-output name=plan_success::true"
+            echo "Plan created successfully."
+          else
+            echo "::set-output name=plan_success::false"
+            echo "Plan was not created."
+          fi
+
+      - name: 'Upload Plan as Artifact'
+        if: steps.plan_check.outputs.plan_success == 'true'
+        uses: actions/upload-artifact@v2
+        with:
+          name: tfplan
+          path: tfplan
+
   terraform_apply:
-    needs: [terraform_plan]
-    #if: github.event_name == 'workflow_dispatch'
+    needs: terraform_plan
+    if: needs.terraform_plan.outputs.plan_success == 'true'
     runs-on: ubuntu-latest
     environment:
-       name: 'dev' # Use the name of your environment that requires approval
+      name: 'dev'
 
     steps:
       - name: 'Checkout'
         uses: actions/checkout@v3
+
+      - name: 'Download Plan Artifact'
+        uses: actions/download-artifact@v2
+        with:
+          name: tfplan
 
       - name: 'Setup Terraform'
         uses: hashicorp/setup-terraform@v1
@@ -51,6 +76,6 @@ jobs:
         run: terraform init
 
       - name: 'Terraform Apply'
-        run: terraform apply -auto-approve
+        run: terraform apply -auto-approve tfplan
         env:
           TF_VAR_github_token: ${{ secrets.TF_GITHUB_TOKEN }}
