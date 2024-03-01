@@ -37,15 +37,15 @@ jobs:
         id: check_changes
         run: |
           if grep -q "No changes. Infrastructure is up-to-date." plan_output.txt; then
-            echo "::set-output name=plan_success::false"
+            echo "plan_success=false" >> $GITHUB_ENV
             echo "No changes detected."
           else
-            echo "::set-output name=plan_success::true"
+            echo "plan_success=true" >> $GITHUB_ENV
             echo "Changes detected. Plan created successfully."
           fi
 
       - name: 'Upload Plan as Artifact'
-        if: steps.check_changes.outputs.plan_success == 'true'
+        if: env.plan_success == 'true'
         uses: actions/upload-artifact@v2
         with:
           name: tfplan
