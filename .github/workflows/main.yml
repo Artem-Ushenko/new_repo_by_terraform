@@ -53,7 +53,7 @@ jobs:
 
   terraform_apply:
     needs: terraform_plan
-    if: needs.terraform_plan.outputs.plan_success == 'true' && github.event_name == 'workflow_dispatch'
+    if: needs.terraform_plan.outputs.plan_success == 'true'
     runs-on: ubuntu-latest
     environment:
       name: 'dev'
