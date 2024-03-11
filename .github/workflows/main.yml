@@ -28,7 +28,7 @@ jobs:
         run: terraform fmt
 
       - name: 'Terraform Plan'
-        run: terraform plan #-out=tfplan | tee plan_output.txt
+        run: terraform plan -out=tfplan
         env:
           TF_VAR_github_token: ${{ secrets.TF_GITHUB_TOKEN }}
 
