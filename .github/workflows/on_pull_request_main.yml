@@ -1,8 +1,9 @@
-name: 'New Repo by Terraform CI/CD'
+name: 'New Repo by Terraform CI/CD on pull request to develop'
 
 on:
   pull_request:
-
+    branches:
+      - main
 jobs:
   terraform_plan:
     runs-on: ubuntu-latest
