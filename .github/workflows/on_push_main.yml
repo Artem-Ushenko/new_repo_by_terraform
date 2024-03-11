@@ -3,7 +3,7 @@ name: 'New Repo by Terraform CI/CD on push to develop'
 on:
   push:
     branches:
-      - develop
+      - main
 
 jobs:
   terraform_plan:
