@@ -1,10 +1,9 @@
-name: 'New Repo by Terraform CI/CD'
+name: 'New Repo by Terraform CI/CD on push to develop'
 
 on:
   push:
     branches:
       - main
-  workflow_dispatch:
 
 jobs:
   terraform_plan:
@@ -32,17 +31,6 @@ jobs:
         env:
           TF_VAR_github_token: ${{ secrets.TF_GITHUB_TOKEN }}
 
-      # - name: 'Check for Changes in Plan Output'
-      #   id: check_changes
-      #   run: |
-      #     if grep -q "No changes. Infrastructure is up-to-date." plan_output.txt; then
-      #       echo "plan_success=false" >> $GITHUB_ENV
-      #       echo "No changes detected."
-      #     else
-      #       echo "plan_success=true" >> $GITHUB_ENV
-      #       echo "Changes detected. Plan created successfully."
-      #     fi
-
       - name: 'Upload Plan as Artifact'
         #if: env.plan_success == 'true'
         uses: actions/upload-artifact@v2
@@ -52,11 +40,7 @@ jobs:
 
   terraform_apply:
     needs: terraform_plan
-    #if: needs.terraform_plan.outputs.plan_success == 'true'
-    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
-    # environment:
-    #   name: 'dev'
 
     steps:
       - name: 'Checkout'
